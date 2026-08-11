@@ -2,8 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { io } from 'socket.io-client';
 
 // Component ke bahar instance initialize karein taaki multiple re-renders par multiple connections mat bane
-const socket = io(import.meta.env.VITE_API_URL, {
-  autoConnect: true,
+const BACKEND_URL = (import.meta.env.VITE_BACKEND_URL);
+
+ const socket = io(BACKEND_URL, {
+  transports: ["polling"],
+  withCredentials: true,
 });
 
 function Header() {

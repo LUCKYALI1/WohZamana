@@ -23,10 +23,11 @@ app.use(express.json());
 // Create HTTP server wrapping Express
 const server = createServer(app);
 
-// Initialize Socket.io
+const FRONTEND_URL = (process.env.FRONTEND_URL || "https://wohzamana.netlify.app").replace(/\/$/, "");
+
 const io = new Server(server, {
   cors: {
-    origin: allowedOrigins.includes(origin.replace(/\/$/, "")),
+    origin: FRONTEND_URL,
     methods: ["GET", "POST"],
     credentials: true,
   },
