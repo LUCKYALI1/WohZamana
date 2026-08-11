@@ -1,6 +1,4 @@
 import { v2 as cloudinary } from "cloudinary";
-import { CloudinaryStorage } from "multer-storage-cloudinary";
-import multer from "multer";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -11,32 +9,4 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const storage = new CloudinaryStorage({
-  cloudinary,
-
-  params: async (req, file) => {
-    const isAudio = file.mimetype.startsWith("audio/");
-
-    return {
-      folder: isAudio
-        ? "woh_zamana/audio"
-        : "woh_zamana/covers",
-
-      resource_type: isAudio
-        ? "video"
-        : "image",
-
-      allowed_formats: isAudio
-        ? ["mp3", "wav", "m4a"]
-        : ["jpg", "jpeg", "png", "webp"],
-    };
-  },
-});
-
-export const upload = multer({
-  storage,
-
-  limits: {
-    fileSize: 10 * 1024 * 1024, // 10 MB
-  },
-});
+export default cloudinary;

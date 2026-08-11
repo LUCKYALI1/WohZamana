@@ -8,7 +8,7 @@ const connectDB = async () => {
     return;
   }
 
-  // Already connecting
+  // Connection already in progress
   if (isConnecting) {
     return;
   }
@@ -23,7 +23,11 @@ const connectDB = async () => {
 
     console.log("✅ MongoDB connected");
   } catch (error) {
-    console.error("❌ MongoDB connection error:", error.message);
+    console.error(
+      "❌ MongoDB connection error:",
+      error.message
+    );
+
     throw error;
   } finally {
     isConnecting = false;

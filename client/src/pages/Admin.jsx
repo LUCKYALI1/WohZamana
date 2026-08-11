@@ -1,5 +1,10 @@
 import React, { useState } from "react";
-import { uploadSong } from "../api/Client.api";
+
+import {
+  getCloudinarySignature,
+  uploadToCloudinary,
+  saveSong,
+} from "../api/Client.api";
 
 function AdminUpload() {
   const [formData, setFormData] = useState({
@@ -8,17 +13,37 @@ function AdminUpload() {
     album: "",
   });
 
-  const [audioFile, setAudioFile] = useState(null);
-  const [coverFile, setCoverFile] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
+  const [audioFile, setAudioFile] =
+    useState(null);
 
-  // Maximum file sizes
-  const MAX_AUDIO_SIZE = 10 * 1024 * 1024; // 10 MB
-  const MAX_COVER_SIZE = 5 * 1024 * 1024; // 5 MB
+  const [coverFile, setCoverFile] =
+    useState(null);
+
+  const [loading, setLoading] =
+    useState(false);
+
+  const [message, setMessage] =
+    useState("");
+
+  // ==================================================
+  // FILE LIMITS
+  // ==================================================
+
+  const MAX_AUDIO_SIZE =
+    10 * 1024 * 1024; // 10 MB
+
+  const MAX_COVER_SIZE =
+    5 * 1024 * 1024; // 5 MB
+
+  // ==================================================
+  // TEXT INPUT
+  // ==================================================
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const {
+      name,
+      value,
+    } = e.target;
 
     setFormData((prev) => ({
       ...prev,
@@ -26,20 +51,44 @@ function AdminUpload() {
     }));
   };
 
+  // ==================================================
+  // AUDIO
+  // ==================================================
+
   const handleAudioChange = (e) => {
-    const file = e.target.files[0];
+    const file =
+      e.target.files[0];
 
     if (!file) {
       setAudioFile(null);
       return;
     }
 
-    // Check audio size
-    if (file.size > MAX_AUDIO_SIZE) {
+    if (
+      !file.type.startsWith(
+        "audio/"
+      )
+    ) {
       setAudioFile(null);
       e.target.value = "";
 
-      setMessage("❌ Audio file must be smaller than 10 MB.");
+      setMessage(
+        "❌ Please select a valid audio file."
+      );
+
+      return;
+    }
+
+    if (
+      file.size > MAX_AUDIO_SIZE
+    ) {
+      setAudioFile(null);
+      e.target.value = "";
+
+      setMessage(
+        "❌ Audio file must be smaller than 10 MB."
+      );
+
       return;
     }
 
@@ -47,20 +96,44 @@ function AdminUpload() {
     setMessage("");
   };
 
+  // ==================================================
+  // COVER
+  // ==================================================
+
   const handleCoverChange = (e) => {
-    const file = e.target.files[0];
+    const file =
+      e.target.files[0];
 
     if (!file) {
       setCoverFile(null);
       return;
     }
 
-    // Check cover size
-    if (file.size > MAX_COVER_SIZE) {
+    if (
+      !file.type.startsWith(
+        "image/"
+      )
+    ) {
       setCoverFile(null);
       e.target.value = "";
 
-      setMessage("❌ Cover image must be smaller than 5 MB.");
+      setMessage(
+        "❌ Please select a valid image."
+      );
+
+      return;
+    }
+
+    if (
+      file.size > MAX_COVER_SIZE
+    ) {
+      setCoverFile(null);
+      e.target.value = "";
+
+      setMessage(
+        "❌ Cover image must be smaller than 5 MB."
+      );
+
       return;
     }
 
@@ -68,42 +141,137 @@ function AdminUpload() {
     setMessage("");
   };
 
+  // ==================================================
+  // SUBMIT
+  // ==================================================
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!audioFile || !coverFile) {
-      setMessage("❌ Please select both audio and cover files.");
+      setMessage(
+        "❌ Please select both audio and cover files."
+      );
+
       return;
     }
 
-    // Extra safety check before uploading
-    if (audioFile.size > MAX_AUDIO_SIZE) {
-      setMessage("❌ Audio file must be smaller than 10 MB.");
+    if (!formData.title.trim()) {
+      setMessage(
+        "❌ Please enter song title."
+      );
+
       return;
     }
 
-    if (coverFile.size > MAX_COVER_SIZE) {
-      setMessage("❌ Cover image must be smaller than 5 MB.");
+    if (!formData.artist.trim()) {
+      setMessage(
+        "❌ Please enter artist name."
+      );
+
       return;
     }
 
     setLoading(true);
     setMessage("");
 
-    const data = new FormData();
-
-    data.append("title", formData.title);
-    data.append("artist", formData.artist);
-    data.append("album", formData.album);
-    data.append("audio", audioFile);
-    data.append("cover", coverFile);
-
     try {
-      await uploadSong(data);
+      // ==============================================
+      // 1. GET AUDIO SIGNATURE
+      // ==============================================
 
-      setMessage("🎉 Song uploaded successfully!");
+      setMessage(
+        "🔐 Preparing secure audio upload..."
+      );
 
-      // Reset form
+      const audioSignature =
+        await getCloudinarySignature(
+          "video"
+        );
+
+      // ==============================================
+      // 2. UPLOAD AUDIO DIRECTLY TO CLOUDINARY
+      // ==============================================
+
+      setMessage(
+        "🎵 Uploading audio to Cloudinary..."
+      );
+
+      const audioResult =
+        await uploadToCloudinary(
+          audioFile,
+          audioSignature,
+          "video"
+        );
+
+      console.log(
+        "Audio uploaded:",
+        audioResult.secure_url
+      );
+
+      // ==============================================
+      // 3. GET COVER SIGNATURE
+      // ==============================================
+
+      setMessage(
+        "🔐 Preparing cover upload..."
+      );
+
+      const coverSignature =
+        await getCloudinarySignature(
+          "image"
+        );
+
+      // ==============================================
+      // 4. UPLOAD COVER DIRECTLY TO CLOUDINARY
+      // ==============================================
+
+      setMessage(
+        "🖼️ Uploading cover to Cloudinary..."
+      );
+
+      const coverResult =
+        await uploadToCloudinary(
+          coverFile,
+          coverSignature,
+          "image"
+        );
+
+      console.log(
+        "Cover uploaded:",
+        coverResult.secure_url
+      );
+
+      // ==============================================
+      // 5. SAVE URLS TO MONGODB
+      // ==============================================
+
+      setMessage(
+        "💾 Saving song information..."
+      );
+
+      await saveSong({
+        title: formData.title.trim(),
+        artist: formData.artist.trim(),
+        album:
+          formData.album.trim() ||
+          "Single",
+
+        audioUrl:
+          audioResult.secure_url,
+
+        coverUrl:
+          coverResult.secure_url,
+      });
+
+      // ==============================================
+      // 6. SUCCESS
+      // ==============================================
+
+      setMessage(
+        "🎉 Song uploaded successfully!"
+      );
+
       setFormData({
         title: "",
         artist: "",
@@ -113,17 +281,20 @@ function AdminUpload() {
       setAudioFile(null);
       setCoverFile(null);
 
-      // Reset file inputs
       e.target.reset();
+
     } catch (error) {
-      console.error("Upload error:", error);
+      console.error(
+        "❌ Upload error:",
+        error
+      );
 
-      const errorMessage =
-        error?.message ||
-        error?.error ||
-        "Server error during upload.";
-
-      setMessage(`❌ Upload failed: ${errorMessage}`);
+      setMessage(
+        `❌ Upload failed: ${
+          error?.message ||
+          "Something went wrong."
+        }`
+      );
     } finally {
       setLoading(false);
     }
@@ -131,6 +302,7 @@ function AdminUpload() {
 
   return (
     <div className="min-h-screen bg-black text-white flex items-center justify-center p-6">
+
       <div className="max-w-md w-full bg-zinc-900/80 border border-white/10 p-8 rounded-3xl backdrop-blur-md shadow-2xl">
 
         <h2 className="text-2xl font-bold mb-6 text-rose-200 tracking-wide text-center">
@@ -149,6 +321,7 @@ function AdminUpload() {
         >
 
           {/* Song Title */}
+
           <div>
             <label className="text-xs text-white/60 mb-1 block">
               Song Title
@@ -166,6 +339,7 @@ function AdminUpload() {
           </div>
 
           {/* Artist */}
+
           <div>
             <label className="text-xs text-white/60 mb-1 block">
               Artist Name
@@ -183,6 +357,7 @@ function AdminUpload() {
           </div>
 
           {/* Album */}
+
           <div>
             <label className="text-xs text-white/60 mb-1 block">
               Album Name (Optional)
@@ -199,9 +374,10 @@ function AdminUpload() {
           </div>
 
           {/* Cover */}
+
           <div>
             <label className="text-xs text-white/60 mb-1 block">
-              Cover Image (JPG/PNG/WebP) — Max 5 MB
+              Cover Image — Max 5 MB
             </label>
 
             <input
@@ -221,17 +397,29 @@ function AdminUpload() {
                 hover:file:bg-white/20
                 cursor-pointer"
             />
+
+            {coverFile && (
+              <p className="mt-2 text-xs text-white/50">
+                🖼️ {coverFile.name} —{" "}
+                {(
+                  coverFile.size /
+                  (1024 * 1024)
+                ).toFixed(2)}{" "}
+                MB
+              </p>
+            )}
           </div>
 
           {/* Audio */}
+
           <div>
             <label className="text-xs text-white/60 mb-1 block">
-              Audio File (MP3/WAV) — Max 10 MB
+              Audio File — Max 10 MB
             </label>
 
             <input
               type="file"
-              accept="audio/mpeg,audio/mp3,audio/wav"
+              accept="audio/mpeg,audio/mp3,audio/wav,audio/x-m4a"
               required
               onChange={handleAudioChange}
               className="w-full text-xs text-white/70
@@ -250,12 +438,17 @@ function AdminUpload() {
             {audioFile && (
               <p className="mt-2 text-xs text-white/50">
                 🎵 {audioFile.name} —{" "}
-                {(audioFile.size / (1024 * 1024)).toFixed(2)} MB
+                {(
+                  audioFile.size /
+                  (1024 * 1024)
+                ).toFixed(2)}{" "}
+                MB
               </p>
             )}
           </div>
 
           {/* Submit */}
+
           <button
             type="submit"
             disabled={loading}
