@@ -13,7 +13,7 @@ dotenv.config();
 dns.setServers(['8.8.8.8', '1.1.1.1']);
 
 const app = express();
-app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
 app.use(express.json());
 
 // Create HTTP server wrapping Express
@@ -22,7 +22,7 @@ const server = createServer(app);
 // Initialize Socket.io
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: process.env.FRONTEND_URL,
     methods: ["GET", "POST"],
     credentials: true,
   },
