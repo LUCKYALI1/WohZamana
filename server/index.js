@@ -46,7 +46,7 @@ const corsOptions = {
       return callback(null, true);
     }
 
-    console.log("❌ CORS blocked:", origin);
+    // console.log("❌ CORS blocked:", origin);
 
     return callback(
       new Error("Not allowed by CORS")
@@ -148,10 +148,10 @@ app.get(
           process.env.CLOUDINARY_API_KEY,
       });
     } catch (error) {
-      console.error(
-        "❌ Cloudinary signature error:",
-        error
-      );
+      // console.error(
+      //   "❌ Cloudinary signature error:",
+      //   error
+      // );
 
       res.status(500).json({
         success: false,
@@ -240,10 +240,10 @@ app.get("/api/songs/random", async (req, res) => {
       songs,
     });
   } catch (error) {
-    console.error(
-      "❌ Random songs error:",
-      error
-    );
+    // console.error(
+    //   "❌ Random songs error:",
+    //   error
+    // );
 
     return res.status(500).json({
       success: false,
@@ -348,10 +348,10 @@ app.post("/api/songs", async (req, res) => {
       coverUrl,
     });
 
-    console.log(
-      "✅ Song saved:",
-      newSong._id
-    );
+    // console.log(
+    //   "✅ Song saved:",
+    //   newSong._id
+    // );
 
     // Notify connected users
     io.emit("songAdded", newSong);
@@ -362,10 +362,10 @@ app.post("/api/songs", async (req, res) => {
       song: newSong,
     });
   } catch (error) {
-    console.error(
-      "❌ Save song error:",
-      error
-    );
+    // console.error(
+    //   "❌ Save song error:",
+    //   error
+    // );
 
     res.status(500).json({
       success: false,
@@ -395,10 +395,10 @@ const io = new Server(server, {
 let onlineCount = 0;
 
 io.on("connection", (socket) => {
-  console.log(
-    "🔌 Socket connected:",
-    socket.id
-  );
+  // console.log(
+  //   "🔌 Socket connected:",
+  //   socket.id
+  // );
 
   onlineCount++;
 
@@ -408,10 +408,10 @@ io.on("connection", (socket) => {
   );
 
   socket.on("disconnect", () => {
-    console.log(
-      "🔌 Socket disconnected:",
-      socket.id
-    );
+    // console.log(
+    //   "🔌 Socket disconnected:",
+    //   socket.id
+    // );
 
     onlineCount = Math.max(
       0,
@@ -431,10 +431,10 @@ io.on("connection", (socket) => {
 
 app.use(
   (err, req, res, next) => {
-    console.error(
-      "❌ Server error:",
-      err
-    );
+    // console.error(
+    //   "❌ Server error:",
+    //   err
+    // );
 
     if (res.headersSent) {
       return next(err);
@@ -461,15 +461,15 @@ const startServer = async () => {
     await connectDB();
 
     server.listen(PORT, () => {
-      console.log(
-        `🚀 Server running on port ${PORT}`
-      );
+      // console.log(
+      //   `🚀 Server running on port ${PORT}`
+      // );
     });
   } catch (error) {
-    console.error(
-      "❌ Server startup failed:",
-      error
-    );
+    // console.error(
+    //   "❌ Server startup failed:",
+    //   error
+    // );
 
     process.exit(1);
   }

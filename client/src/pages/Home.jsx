@@ -5,7 +5,8 @@ import React, {
   useCallback,
 } from "react";
 
-import img from "../assets/ff.png";
+import img from "../assets/bg.png";
+import mobileImg from "../assets/mobile.png";
 import Header from "../component/Header";
 import AudioPlayer from "../ui/Player";
 
