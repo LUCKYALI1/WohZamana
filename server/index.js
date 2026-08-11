@@ -7,6 +7,10 @@ import { Server } from "socket.io";
 import connectDB from "./db/db.config.js";
 import cloudinary from "./config/cloudinary.js";
 import { Song } from "./models/Song.js";
+import dns from "dns";
+
+
+dns.setServers(['8.8.8.8', '1.1.1.1']);
 
 dotenv.config();
 
@@ -157,7 +161,93 @@ app.get(
 // ==================================================
 // GET SONGS
 // ==================================================
+// ==================================================
+// GET RANDOM SONGS FOR PLAY QUEUE
+// ==================================================
 
+app.get("/api/songs/random", async (req, res) => {
+  try {
+    await connectDB();
+
+    const requestedCount = Math.min(
+      Math.max(
+        parseInt(req.query.count) || 5,
+        1
+      ),
+      10
+    );
+
+    const excludeParam =
+      req.query.exclude || "";
+
+    const excludeIds = excludeParam
+      .split(",")
+      .map((id) => id.trim())
+      .filter((id) =>
+        /^[0-9a-fA-F]{24}$/.test(id)
+      );
+
+    const excludeObjectIds =
+      excludeIds.map(
+        (id) =>
+          new mongoose.Types.ObjectId(id)
+      );
+
+    const filter =
+      excludeObjectIds.length > 0
+        ? {
+            _id: {
+              $nin: excludeObjectIds,
+            },
+          }
+        : {};
+
+    // Important:
+    // Don't ask MongoDB for more songs
+    // than actually exist outside the queue.
+    const availableCount =
+      await Song.countDocuments(filter);
+
+    const sampleSize = Math.min(
+      requestedCount,
+      availableCount
+    );
+
+    if (sampleSize === 0) {
+      return res.status(200).json({
+        success: true,
+        songs: [],
+      });
+    }
+
+    const songs = await Song.aggregate([
+      {
+        $match: filter,
+      },
+      {
+        $sample: {
+          size: sampleSize,
+        },
+      },
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      songs,
+    });
+  } catch (error) {
+    console.error(
+      "❌ Random songs error:",
+      error
+    );
+
+    return res.status(500).json({
+      success: false,
+      message: "Could not fetch random songs",
+      error: error.message,
+    });
+  }
+});
 app.get("/api/songs", async (req, res) => {
   try {
     await connectDB();
