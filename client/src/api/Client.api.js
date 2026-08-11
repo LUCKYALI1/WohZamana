@@ -9,7 +9,7 @@ const client = axios.create({
 
 export const uploadSong = async (formData) => {
   try {
-    const response = await client.post("/songs/upload", formData, {
+    const response = await client.post("api/songs/upload", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -23,7 +23,7 @@ export const uploadSong = async (formData) => {
 // Paginated Fetch API
 export const getSongs = async (page = 1, limit = 5) => {
   try {
-    const response = await client.get(`/songs?page=${page}&limit=${limit}`);
+    const response = await client.get(`api/songs?page=${page}&limit=${limit}`);
     return response.data; // { songs: [...], hasMore: true/false }
   } catch (error) {
     throw error.response ? error.response.data : new Error("Network Error");
