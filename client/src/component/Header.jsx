@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { io } from 'socket.io-client';
 
-// Component ke bahar instance initialize karein taaki multiple re-renders par multiple connections mat bane
-const BACKEND_URL = (import.meta.env.VITE_BACKEND_URL);
 
- const socket = io(BACKEND_URL, {
-  transports: ["polling"],
-  withCredentials: true,
-});
-
+const socket = io(
+  import.meta.env.VITE_BACKEND_URL,
+  {
+    transports: ["polling", "websocket"],
+    withCredentials: true,
+  }
+);
 function Header() {
   const [time, setTime] = useState('');
   const [onlineCount, setOnlineCount] = useState(1);
@@ -36,6 +36,23 @@ function Header() {
       socket.off("onlineCountUpdate");
     };
   }, []);
+  useEffect(() => {
+  const handleOnlineCount = (count) => {
+    setOnlineCount(count);
+  };
+
+  socket.on(
+    "onlineCountUpdate",
+    handleOnlineCount
+  );
+
+  return () => {
+    socket.off(
+      "onlineCountUpdate",
+      handleOnlineCount
+    );
+  };
+}, []);
 
   return (
     <header className="fixed top-0 left-0 w-full px-6 py-4 flex items-center justify-between text-white z-20 font-mono text-sm select-none">

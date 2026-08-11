@@ -12,15 +12,32 @@ cloudinary.config({
 });
 
 const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
+  cloudinary,
+
   params: async (req, file) => {
-    const isAudio = file.mimetype.startsWith("audio");
+    const isAudio =
+      file.mimetype.startsWith("audio/");
+
     return {
-      folder: isAudio ? "woh_zamana/audio" : "woh_zamana/covers",
-      resource_type: isAudio ? "video" : "image", // Cloudinary treats audio as "video" resource type
-      allowed_formats: isAudio ? ["mp3", "wav", "m4a"] : ["jpg", "png", "jpeg", "webp"],
+      folder: isAudio
+        ? "woh_zamana/audio"
+        : "woh_zamana/covers",
+
+      resource_type: isAudio
+        ? "video"
+        : "image",
+
+      allowed_formats: isAudio
+        ? ["mp3", "wav", "m4a"]
+        : ["jpg", "jpeg", "png", "webp"],
     };
   },
 });
 
-export const upload = multer({ storage });
+export const upload = multer({
+  storage,
+
+  limits: {
+    fileSize: 100 * 1024 * 1024,
+  },
+});
