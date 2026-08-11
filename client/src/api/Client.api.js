@@ -1,9 +1,12 @@
 import axios from "axios";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+const BACKEND_URL =
+  import.meta.env.VITE_BACKEND_URL;
 
 if (!BACKEND_URL) {
-  throw new Error("VITE_BACKEND_URL is not configured");
+  throw new Error(
+    "VITE_BACKEND_URL is not configured"
+  );
 }
 
 const client = axios.create({
@@ -15,7 +18,9 @@ const client = axios.create({
 // GET CLOUDINARY SIGNATURE
 // ==================================================
 
-export const getCloudinarySignature = async (type) => {
+export const getCloudinarySignature = async (
+  type
+) => {
   try {
     const response = await client.get(
       `/api/cloudinary/signature?type=${type}`
@@ -64,15 +69,21 @@ export const uploadToCloudinary = async (
   formData.append("signature", signature);
   formData.append("folder", folder);
 
-  const response = await fetch(uploadUrl, {
-    method: "POST",
-    body: formData,
-  });
+  const response = await fetch(
+    uploadUrl,
+    {
+      method: "POST",
+      body: formData,
+    }
+  );
 
   const result = await response.json();
 
   if (!response.ok) {
-    console.error("Cloudinary upload error:", result);
+    console.error(
+      "Cloudinary upload error:",
+      result
+    );
 
     throw new Error(
       result?.error?.message ||
@@ -134,8 +145,9 @@ export const getSongs = async (
     );
   }
 };
+
 // ==================================================
-// GET RANDOM SONGS
+// GET RANDOM SONGS FOR PLAYER QUEUE
 // ==================================================
 
 export const getRandomSongs = async (
@@ -145,7 +157,10 @@ export const getRandomSongs = async (
   try {
     const params = new URLSearchParams();
 
-    params.set("count", String(count));
+    params.set(
+      "count",
+      String(count)
+    );
 
     if (excludeIds.length > 0) {
       params.set(

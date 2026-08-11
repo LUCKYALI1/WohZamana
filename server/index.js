@@ -1,3 +1,11 @@
+import dns from "dns";
+import mongoose from "mongoose";
+
+dns.setServers([
+  "8.8.8.8",
+  "1.1.1.1",
+]);
+
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -7,10 +15,6 @@ import { Server } from "socket.io";
 import connectDB from "./db/db.config.js";
 import cloudinary from "./config/cloudinary.js";
 import { Song } from "./models/Song.js";
-import dns from "dns";
-
-
-dns.setServers(['8.8.8.8', '1.1.1.1']);
 
 dotenv.config();
 

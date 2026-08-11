@@ -16,20 +16,19 @@ const REFILL_THRESHOLD = 2;
 
 function Home() {
   const [playlist, setPlaylist] = useState([]);
-  const [currentTrackIndex, setCurrentTrackIndex] =
-    useState(0);
+  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
 
-  // Keep latest playlist available inside async callbacks
+  // Always keep latest queue available to async functions
   const playlistRef = useRef([]);
 
-  // Prevent multiple random requests
+  // Prevent multiple simultaneous requests
   const isFetchingRef = useRef(false);
 
-  // Prevent initial request more than once
+  // Prevent duplicate initial request
   const initializedRef = useRef(false);
 
   // --------------------------------------------------
-  // Keep playlistRef synchronized
+  // KEEP REF IN SYNC WITH PLAYLIST
   // --------------------------------------------------
 
   useEffect(() => {
@@ -37,44 +36,42 @@ function Home() {
   }, [playlist]);
 
   // --------------------------------------------------
-  // FETCH RANDOM SONG BATCH
+  // FETCH RANDOM SONGS
   // --------------------------------------------------
 
   const fetchRandomBatch = useCallback(
     async (count = QUEUE_BATCH_SIZE) => {
+      // Prevent duplicate requests
       if (isFetchingRef.current) {
+        console.log("⏳ Already fetching songs...");
         return;
       }
 
       isFetchingRef.current = true;
 
       try {
-        // Send already queued IDs to backend
-        // so it doesn't immediately return duplicates.
-        const excludeIds =
-          playlistRef.current
-            .map((song) =>
-              String(song._id || song.id)
-            )
-            .filter(Boolean);
+        // IDs already present in queue
+        const excludeIds = playlistRef.current
+          .map((song) => String(song._id || song.id))
+          .filter(Boolean);
 
-        console.log(
-          `🎵 Fetching ${count} random songs...`
-        );
+        console.log("=================================");
+        console.log(`🎵 Fetching ${count} random songs`);
+        console.log("🚫 Excluding:", excludeIds);
+        console.log("=================================");
 
         const data = await getRandomSongs(
           count,
           excludeIds
         );
 
-        const newSongs =
-          Array.isArray(data)
-            ? data
-            : data?.songs || [];
+        const newSongs = Array.isArray(data)
+          ? data
+          : data?.songs || [];
 
         if (!newSongs.length) {
           console.log(
-            "ℹ️ No more songs available."
+            "ℹ️ Backend returned no new songs."
           );
 
           return;
@@ -83,34 +80,32 @@ function Home() {
         setPlaylist((prev) => {
           const existingIds = new Set(
             prev.map((song) =>
-              String(
-                song._id || song.id
-              )
+              String(song._id || song.id)
             )
           );
 
-          const uniqueSongs =
-            newSongs.filter((song) => {
-              const id = String(
-                song._id || song.id
-              );
+          const uniqueSongs = newSongs.filter((song) => {
+            const id = String(
+              song._id || song.id
+            );
 
-              return !existingIds.has(id);
-            });
+            return !existingIds.has(id);
+          });
 
           if (!uniqueSongs.length) {
+            console.log(
+              "ℹ️ All returned songs already exist."
+            );
+
             return prev;
           }
 
-          return [
-            ...prev,
-            ...uniqueSongs,
-          ];
-        });
+          console.log(
+            `✅ Adding ${uniqueSongs.length} songs`
+          );
 
-        console.log(
-          `✅ Added ${newSongs.length} songs to queue`
-        );
+          return [...prev, ...uniqueSongs];
+        });
       } catch (error) {
         console.error(
           "❌ Failed to fetch random songs:",
@@ -134,109 +129,103 @@ function Home() {
 
     initializedRef.current = true;
 
+    console.log("🚀 Initial queue loading...");
+
     fetchRandomBatch(QUEUE_BATCH_SIZE);
   }, [fetchRandomBatch]);
 
   // --------------------------------------------------
-  // CHECK QUEUE
+  // AUTOMATIC QUEUE REFILL
   // --------------------------------------------------
 
-  const checkQueue = useCallback(
-    (nextIndex) => {
-      const currentQueueLength =
-        playlistRef.current.length;
+  useEffect(() => {
+    if (playlist.length === 0) {
+      return;
+    }
 
-      const remaining =
-        currentQueueLength -
-        nextIndex -
-        1;
+    const remaining =
+      playlist.length -
+      currentTrackIndex -
+      1;
 
+    console.log(
+      `🎧 Queue: ${playlist.length} | Current: ${currentTrackIndex} | Remaining: ${remaining}`
+    );
+
+    // When 2 or fewer songs remain,
+    // fetch 5 more in background.
+    if (
+      remaining <= REFILL_THRESHOLD &&
+      !isFetchingRef.current
+    ) {
       console.log(
-        "Queue:",
-        currentQueueLength,
-        "Remaining:",
-        remaining
+        "🔄 Queue low → fetching 5 more songs..."
       );
 
-      // If only 2 or fewer songs are left,
-      // start fetching 5 more in background.
-      if (
-        remaining <= REFILL_THRESHOLD
-      ) {
-        fetchRandomBatch(
-          QUEUE_BATCH_SIZE
-        );
-      }
-    },
-    [fetchRandomBatch]
-  );
+      fetchRandomBatch(QUEUE_BATCH_SIZE);
+    }
+  }, [
+    playlist.length,
+    currentTrackIndex,
+    fetchRandomBatch,
+  ]);
 
   // --------------------------------------------------
   // NEXT
   // --------------------------------------------------
 
   const handleNext = useCallback(() => {
-    const queueLength =
-      playlistRef.current.length;
-
-    if (queueLength === 0) {
+    if (playlistRef.current.length === 0) {
       return;
     }
 
-    setCurrentTrackIndex(
-      (currentIndex) => {
-        const nextIndex =
-          currentIndex + 1;
+    setCurrentTrackIndex((currentIndex) => {
+      const nextIndex = currentIndex + 1;
 
-        // If next song exists
-        if (nextIndex < queueLength) {
-          checkQueue(nextIndex);
-
-          return nextIndex;
-        }
-
-        // We reached the end.
-        // Don't wrap to first song because
-        // this is a continuous random queue.
+      // Don't go beyond currently loaded queue
+      if (
+        nextIndex >= playlistRef.current.length
+      ) {
         console.log(
-          "⏳ Waiting for more songs..."
+          "⏳ No next song available yet..."
         );
 
         return currentIndex;
       }
-    );
-  }, [checkQueue]);
+
+      return nextIndex;
+    });
+  }, []);
 
   // --------------------------------------------------
   // PREVIOUS
   // --------------------------------------------------
 
   const handlePrev = useCallback(() => {
-    const queueLength =
-      playlistRef.current.length;
-
-    if (queueLength === 0) {
+    if (playlistRef.current.length === 0) {
       return;
     }
 
-    setCurrentTrackIndex(
-      (currentIndex) => {
-        // At first song, stay there.
-        if (currentIndex === 0) {
-          return 0;
-        }
-
-        return currentIndex - 1;
+    setCurrentTrackIndex((currentIndex) => {
+      // Already at first song
+      if (currentIndex === 0) {
+        return 0;
       }
-    );
+
+      return currentIndex - 1;
+    });
   }, []);
 
   // --------------------------------------------------
-  // CURRENT TRACK
+  // CURRENT SONG
   // --------------------------------------------------
 
   const currentTrack =
     playlist[currentTrackIndex];
+
+  // --------------------------------------------------
+  // UI
+  // --------------------------------------------------
 
   return (
     <main className="relative w-full h-screen min-h-screen overflow-hidden select-none bg-black">
@@ -273,7 +262,7 @@ function Home() {
 
         <div className="max-w-3xl w-full flex flex-col items-center">
 
-          <p className="mb-2 sm:mb-4 text-xs sm:text-xs md:text-sm tracking-[0.25em] sm:tracking-[0.35em] uppercase text-rose-200 font-mono font-semibold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+          <p className="mb-2 sm:mb-4 text-xs md:text-sm tracking-[0.25em] sm:tracking-[0.35em] uppercase text-rose-200 font-mono font-semibold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
             2000s • BOLLYWOOD • MP3 • BLUETOOTH
           </p>
 
