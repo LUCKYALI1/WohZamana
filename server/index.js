@@ -292,10 +292,10 @@ app.get("/api/songs", async (req, res) => {
       limit,
     });
   } catch (error) {
-    console.error(
-      "❌ Error fetching songs:",
-      error
-    );
+    // console.error(
+    //   "❌ Error fetching songs:",
+    //   error
+    // );
 
     res.status(500).json({
       success: false,
