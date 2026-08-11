@@ -15,8 +15,7 @@ const storage = new CloudinaryStorage({
   cloudinary,
 
   params: async (req, file) => {
-    const isAudio =
-      file.mimetype.startsWith("audio/");
+    const isAudio = file.mimetype.startsWith("audio/");
 
     return {
       folder: isAudio
@@ -38,6 +37,6 @@ export const upload = multer({
   storage,
 
   limits: {
-    fileSize: 100 * 1024 * 1024,
+    fileSize: 10 * 1024 * 1024, // 10 MB
   },
 });

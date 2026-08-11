@@ -13,6 +13,10 @@ function AdminUpload() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
+  // Maximum file sizes
+  const MAX_AUDIO_SIZE = 10 * 1024 * 1024; // 10 MB
+  const MAX_COVER_SIZE = 5 * 1024 * 1024; // 5 MB
+
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -22,11 +26,64 @@ function AdminUpload() {
     }));
   };
 
+  const handleAudioChange = (e) => {
+    const file = e.target.files[0];
+
+    if (!file) {
+      setAudioFile(null);
+      return;
+    }
+
+    // Check audio size
+    if (file.size > MAX_AUDIO_SIZE) {
+      setAudioFile(null);
+      e.target.value = "";
+
+      setMessage("❌ Audio file must be smaller than 10 MB.");
+      return;
+    }
+
+    setAudioFile(file);
+    setMessage("");
+  };
+
+  const handleCoverChange = (e) => {
+    const file = e.target.files[0];
+
+    if (!file) {
+      setCoverFile(null);
+      return;
+    }
+
+    // Check cover size
+    if (file.size > MAX_COVER_SIZE) {
+      setCoverFile(null);
+      e.target.value = "";
+
+      setMessage("❌ Cover image must be smaller than 5 MB.");
+      return;
+    }
+
+    setCoverFile(file);
+    setMessage("");
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!audioFile || !coverFile) {
       setMessage("❌ Please select both audio and cover files.");
+      return;
+    }
+
+    // Extra safety check before uploading
+    if (audioFile.size > MAX_AUDIO_SIZE) {
+      setMessage("❌ Audio file must be smaller than 10 MB.");
+      return;
+    }
+
+    if (coverFile.size > MAX_COVER_SIZE) {
+      setMessage("❌ Cover image must be smaller than 5 MB.");
       return;
     }
 
@@ -144,14 +201,14 @@ function AdminUpload() {
           {/* Cover */}
           <div>
             <label className="text-xs text-white/60 mb-1 block">
-              Cover Image (JPG/PNG)
+              Cover Image (JPG/PNG/WebP) — Max 5 MB
             </label>
 
             <input
               type="file"
               accept="image/jpeg,image/png,image/webp"
               required
-              onChange={(e) => setCoverFile(e.target.files[0])}
+              onChange={handleCoverChange}
               className="w-full text-xs text-white/70
                 file:mr-4
                 file:py-2
@@ -169,14 +226,14 @@ function AdminUpload() {
           {/* Audio */}
           <div>
             <label className="text-xs text-white/60 mb-1 block">
-              Audio File (MP3)
+              Audio File (MP3/WAV) — Max 10 MB
             </label>
 
             <input
               type="file"
               accept="audio/mpeg,audio/mp3,audio/wav"
               required
-              onChange={(e) => setAudioFile(e.target.files[0])}
+              onChange={handleAudioChange}
               className="w-full text-xs text-white/70
                 file:mr-4
                 file:py-2
@@ -189,6 +246,13 @@ function AdminUpload() {
                 hover:file:bg-white/20
                 cursor-pointer"
             />
+
+            {audioFile && (
+              <p className="mt-2 text-xs text-white/50">
+                🎵 {audioFile.name} —{" "}
+                {(audioFile.size / (1024 * 1024)).toFixed(2)} MB
+              </p>
+            )}
           </div>
 
           {/* Submit */}
@@ -197,7 +261,9 @@ function AdminUpload() {
             disabled={loading}
             className="mt-4 w-full py-3 bg-white text-black font-semibold rounded-xl hover:bg-rose-100 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? "Uploading to Cloud..." : "Upload Track"}
+            {loading
+              ? "Uploading to Cloud..."
+              : "Upload Track"}
           </button>
 
         </form>

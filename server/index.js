@@ -153,17 +153,17 @@ app.post(
   ]),
 
   async (req, res) => {
+    console.log("=================================");
+    console.log("📥 UPLOAD REQUEST RECEIVED");
+    console.log("Body:", req.body);
+    console.log("Files:", req.files);
+    console.log("=================================");
+
     try {
-      // Make sure DB is connected
       await connectDB();
 
-      const {
-        title,
-        artist,
-        album,
-      } = req.body;
+      const { title, artist, album } = req.body;
 
-      // Validate text fields
       if (!title || !artist) {
         return res.status(400).json({
           success: false,
@@ -171,7 +171,6 @@ app.post(
         });
       }
 
-      // Validate files
       if (
         !req.files ||
         !req.files.audio ||
@@ -187,31 +186,44 @@ app.post(
       const audioFile = req.files.audio[0];
       const coverFile = req.files.cover[0];
 
-      const audioUrl = audioFile.path;
-      const coverUrl = coverFile.path;
+      console.log("🎵 Audio:", {
+        name: audioFile.originalname,
+        size: audioFile.size,
+        type: audioFile.mimetype,
+        path: audioFile.path,
+      });
+
+      console.log("🖼️ Cover:", {
+        name: coverFile.originalname,
+        size: coverFile.size,
+        type: coverFile.mimetype,
+        path: coverFile.path,
+      });
 
       const newSong = await Song.create({
         title,
         artist,
         album: album || "Single",
-        coverUrl,
-        audioUrl,
+        coverUrl: coverFile.path,
+        audioUrl: audioFile.path,
       });
 
-      console.log("✅ Song created:", newSong._id);
+      console.log("✅ MongoDB song created:", newSong._id);
 
-      // Notify connected users
       io.emit("songAdded", newSong);
 
-      res.status(201).json({
+      return res.status(201).json({
         success: true,
         message: "Song uploaded successfully!",
         song: newSong,
       });
-    } catch (error) {
-      console.error("❌ Upload failed:", error);
 
-      res.status(500).json({
+    } catch (error) {
+      console.error("❌❌ UPLOAD ERROR ❌❌");
+      console.error(error);
+      console.error(error.stack);
+
+      return res.status(500).json({
         success: false,
         message: "Upload failed",
         error: error.message,
