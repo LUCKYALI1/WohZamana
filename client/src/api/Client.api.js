@@ -28,10 +28,10 @@ export const getCloudinarySignature = async (
 
     return response.data;
   } catch (error) {
-    console.error(
-      "Cloudinary signature error:",
-      error.response?.data || error
-    );
+    // console.error(
+    //   "Cloudinary signature error:",
+    //   error.response?.data || error
+    // );
 
     throw new Error(
       error.response?.data?.message ||
@@ -80,10 +80,10 @@ export const uploadToCloudinary = async (
   const result = await response.json();
 
   if (!response.ok) {
-    console.error(
-      "Cloudinary upload error:",
-      result
-    );
+    // console.error(
+    //   "Cloudinary upload error:",
+    //   result
+    // );
 
     throw new Error(
       result?.error?.message ||
@@ -107,10 +107,10 @@ export const saveSong = async (songData) => {
 
     return response.data;
   } catch (error) {
-    console.error(
-      "Save song error:",
-      error.response?.data || error
-    );
+    // console.error(
+    //   "Save song error:",
+    //   error.response?.data || error
+    // );
 
     throw new Error(
       error.response?.data?.message ||
@@ -175,10 +175,10 @@ export const getRandomSongs = async (
 
     return response.data;
   } catch (error) {
-    console.error(
-      "Get random songs error:",
-      error.response?.data || error
-    );
+    // console.error(
+    //   "Get random songs error:",
+    //   error.response?.data || error
+    // );
 
     throw new Error(
       error.response?.data?.message ||

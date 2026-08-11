@@ -44,7 +44,7 @@ function Home() {
     async (count = QUEUE_BATCH_SIZE) => {
       // Prevent duplicate requests
       if (isFetchingRef.current) {
-        console.log("⏳ Already fetching songs...");
+        // console.log("⏳ Already fetching songs...");
         return;
       }
 
@@ -56,10 +56,10 @@ function Home() {
           .map((song) => String(song._id || song.id))
           .filter(Boolean);
 
-        console.log("=================================");
-        console.log(`🎵 Fetching ${count} random songs`);
-        console.log("🚫 Excluding:", excludeIds);
-        console.log("=================================");
+        // console.log("=================================");
+        // console.log(`🎵 Fetching ${count} random songs`);
+        // console.log("🚫 Excluding:", excludeIds);
+        // console.log("=================================");
 
         const data = await getRandomSongs(
           count,
@@ -94,24 +94,24 @@ function Home() {
           });
 
           if (!uniqueSongs.length) {
-            console.log(
-              "ℹ️ All returned songs already exist."
-            );
+            // console.log(
+            //   "ℹ️ All returned songs already exist."
+            // );
 
             return prev;
           }
 
-          console.log(
-            `✅ Adding ${uniqueSongs.length} songs`
-          );
+          // console.log(
+          //   `✅ Adding ${uniqueSongs.length} songs`
+          // );
 
           return [...prev, ...uniqueSongs];
         });
       } catch (error) {
-        console.error(
-          "❌ Failed to fetch random songs:",
-          error
-        );
+        // console.error(
+        //   "❌ Failed to fetch random songs:",
+        //   error
+        // );
       } finally {
         isFetchingRef.current = false;
       }
@@ -130,7 +130,7 @@ function Home() {
 
     initializedRef.current = true;
 
-    console.log("🚀 Initial queue loading...");
+    // console.log("🚀 Initial queue loading...");
 
     fetchRandomBatch(QUEUE_BATCH_SIZE);
   }, [fetchRandomBatch]);
@@ -149,9 +149,9 @@ function Home() {
       currentTrackIndex -
       1;
 
-    console.log(
-      `🎧 Queue: ${playlist.length} | Current: ${currentTrackIndex} | Remaining: ${remaining}`
-    );
+    // console.log(
+    //   `🎧 Queue: ${playlist.length} | Current: ${currentTrackIndex} | Remaining: ${remaining}`
+    // );
 
     // When 2 or fewer songs remain,
     // fetch 5 more in background.
@@ -159,9 +159,9 @@ function Home() {
       remaining <= REFILL_THRESHOLD &&
       !isFetchingRef.current
     ) {
-      console.log(
-        "🔄 Queue low → fetching 5 more songs..."
-      );
+      // console.log(
+      //   "🔄 Queue low → fetching 5 more songs..."
+      // );
 
       fetchRandomBatch(QUEUE_BATCH_SIZE);
     }
@@ -187,9 +187,9 @@ function Home() {
       if (
         nextIndex >= playlistRef.current.length
       ) {
-        console.log(
-          "⏳ No next song available yet..."
-        );
+        // console.log(
+        //   "⏳ No next song available yet..."
+        // );
 
         return currentIndex;
       }
