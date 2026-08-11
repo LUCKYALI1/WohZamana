@@ -13,7 +13,11 @@ dotenv.config();
 dns.setServers(['8.8.8.8', '1.1.1.1']);
 
 const app = express();
-app.use(cors({ origin: process.env.FRONTEND_URL.replace(/\/$/, "") }));
+app.use(cors({ origin: process.env.FRONTEND_URL.replace(/\/$/, "") ,
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
 app.use(express.json());
 
 // Create HTTP server wrapping Express
