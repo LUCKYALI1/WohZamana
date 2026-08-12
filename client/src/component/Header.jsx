@@ -47,7 +47,7 @@ function Header() {
     console.log("🔌 Socket URL:", backendUrl);
 
     const socket = io(backendUrl, {
-      transports: ["polling"],
+      transports: ["websocket"],
       withCredentials: true,
       reconnection: true,
       reconnectionAttempts: 5,
@@ -55,17 +55,9 @@ function Header() {
       timeout: 10000,
     });
 
-    // ==================================================
-    // CONNECTED
-    // ==================================================
-
     socket.on("connect", () => {
       console.log("🟢 Socket connected:", socket.id);
     });
-
-    // ==================================================
-    // ONLINE COUNT
-    // ==================================================
 
     const handleOnlineCount = (count) => {
       console.log("👥 Online count:", count);
@@ -74,25 +66,13 @@ function Header() {
 
     socket.on("onlineCountUpdate", handleOnlineCount);
 
-    // ==================================================
-    // CONNECTION ERROR
-    // ==================================================
-
     socket.on("connect_error", (error) => {
       console.error("❌ Socket connection error:", error.message);
     });
 
-    // ==================================================
-    // DISCONNECTED
-    // ==================================================
-
     socket.on("disconnect", (reason) => {
       console.log("🔴 Socket disconnected:", reason);
     });
-
-    // ==================================================
-    // CLEANUP
-    // ==================================================
 
     return () => {
       socket.off("onlineCountUpdate", handleOnlineCount);
@@ -126,10 +106,7 @@ function Header() {
         select-none
       "
     >
-      {/* ==================================================
-          LIVE CLOCK
-      ================================================== */}
-
+      {/* LIVE CLOCK */}
       <div
         className="
           bg-black/30
@@ -150,10 +127,7 @@ function Header() {
         {time || "8:14 PM"}
       </div>
 
-      {/* ==================================================
-          ONLINE COUNTER
-      ================================================== */}
-
+      {/* ONLINE COUNTER */}
       <div
         className="
           flex
@@ -209,10 +183,7 @@ function Header() {
         </span>
       </div>
 
-      {/* ==================================================
-          YOUTUBE MUSIC
-      ================================================== */}
-
+      {/* YOUTUBE MUSIC */}
       <div className="flex items-center gap-2">
         <a
           href="https://music.youtube.com/playlist?list=PLC2QJJ63bR5A"

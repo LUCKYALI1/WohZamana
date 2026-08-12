@@ -466,7 +466,7 @@ dns.setServers([
 //   }
 // };
 
-// startServer();import mongoose from "mongoose";
+import mongoose from "mongoose";
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -539,10 +539,8 @@ const io = new Server(server, {
     credentials: true,
   },
 
-  // Use polling only.
-  // This avoids the failed WebSocket upgrade attempts
-  // seen in the browser console.
-  transports: ["polling"],
+  // WebSocket only
+  transports: ["websocket"],
 });
 
 let onlineCount = 0;
@@ -566,7 +564,10 @@ io.on("connection", (socket) => {
       onlineCount - 1
     );
 
-    io.emit("onlineCountUpdate", onlineCount);
+    io.emit(
+      "onlineCountUpdate",
+      onlineCount
+    );
   });
 });
 
@@ -662,222 +663,204 @@ app.get(
 // GET RANDOM SONGS
 // ==================================================
 
-app.get(
-  "/api/songs/random",
-  async (req, res) => {
-    try {
-      await connectDB();
+app.get("/api/songs/random", async (req, res) => {
+  try {
+    await connectDB();
 
-      const requestedCount = Math.min(
-        Math.max(
-          parseInt(req.query.count) || 5,
-          1
-        ),
-        10
+    const requestedCount = Math.min(
+      Math.max(
+        parseInt(req.query.count) || 5,
+        1
+      ),
+      10
+    );
+
+    const excludeParam =
+      req.query.exclude || "";
+
+    const excludeIds = excludeParam
+      .split(",")
+      .map((id) => id.trim())
+      .filter((id) =>
+        /^[0-9a-fA-F]{24}$/.test(id)
       );
 
-      const excludeParam =
-        req.query.exclude || "";
-
-      const excludeIds = excludeParam
-        .split(",")
-        .map((id) => id.trim())
-        .filter((id) =>
-          /^[0-9a-fA-F]{24}$/.test(id)
-        );
-
-      const excludeObjectIds =
-        excludeIds.map(
-          (id) =>
-            new mongoose.Types.ObjectId(id)
-        );
-
-      const filter =
-        excludeObjectIds.length > 0
-          ? {
-              _id: {
-                $nin: excludeObjectIds,
-              },
-            }
-          : {};
-
-      const availableCount =
-        await Song.countDocuments(filter);
-
-      const sampleSize = Math.min(
-        requestedCount,
-        availableCount
+    const excludeObjectIds =
+      excludeIds.map(
+        (id) =>
+          new mongoose.Types.ObjectId(id)
       );
 
-      if (sampleSize === 0) {
-        return res.status(200).json({
-          success: true,
-          songs: [],
-        });
-      }
+    const filter =
+      excludeObjectIds.length > 0
+        ? {
+            _id: {
+              $nin: excludeObjectIds,
+            },
+          }
+        : {};
 
-      const songs = await Song.aggregate([
-        {
-          $match: filter,
-        },
-        {
-          $sample: {
-            size: sampleSize,
-          },
-        },
-      ]);
+    const availableCount =
+      await Song.countDocuments(filter);
 
+    const sampleSize = Math.min(
+      requestedCount,
+      availableCount
+    );
+
+    if (sampleSize === 0) {
       return res.status(200).json({
         success: true,
-        songs,
-      });
-    } catch (error) {
-      console.error(
-        "❌ Random songs error:",
-        error
-      );
-
-      return res.status(500).json({
-        success: false,
-        message:
-          "Could not fetch random songs",
-        error: error.message,
+        songs: [],
       });
     }
+
+    const songs = await Song.aggregate([
+      {
+        $match: filter,
+      },
+      {
+        $sample: {
+          size: sampleSize,
+        },
+      },
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      songs,
+    });
+  } catch (error) {
+    console.error(
+      "❌ Random songs error:",
+      error
+    );
+
+    return res.status(500).json({
+      success: false,
+      message:
+        "Could not fetch random songs",
+      error: error.message,
+    });
   }
-);
+});
 
 // ==================================================
 // GET SONGS - PAGINATION
 // ==================================================
 
-app.get(
-  "/api/songs",
-  async (req, res) => {
-    try {
-      await connectDB();
+app.get("/api/songs", async (req, res) => {
+  try {
+    await connectDB();
 
-      const page = Math.max(
-        parseInt(req.query.page) || 1,
+    const page = Math.max(
+      parseInt(req.query.page) || 1,
+      1
+    );
+
+    const limit = Math.min(
+      Math.max(
+        parseInt(req.query.limit) || 5,
         1
-      );
+      ),
+      50
+    );
 
-      const limit = Math.min(
-        Math.max(
-          parseInt(req.query.limit) || 5,
-          1
-        ),
-        50
-      );
+    const skip = (page - 1) * limit;
 
-      const skip =
-        (page - 1) * limit;
+    const [totalSongs, songs] =
+      await Promise.all([
+        Song.countDocuments(),
 
-      const [totalSongs, songs] =
-        await Promise.all([
-          Song.countDocuments(),
+        Song.find()
+          .sort({ createdAt: -1 })
+          .skip(skip)
+          .limit(limit)
+          .lean(),
+      ]);
 
-          Song.find()
-            .sort({
-              createdAt: -1,
-            })
-            .skip(skip)
-            .limit(limit)
-            .lean(),
-        ]);
+    return res.status(200).json({
+      success: true,
+      songs,
+      hasMore:
+        skip + songs.length < totalSongs,
+      totalSongs,
+      page,
+      limit,
+    });
+  } catch (error) {
+    console.error(
+      "❌ Error fetching songs:",
+      error
+    );
 
-      return res.status(200).json({
-        success: true,
-        songs,
-        hasMore:
-          skip + songs.length <
-          totalSongs,
-        totalSongs,
-        page,
-        limit,
-      });
-    } catch (error) {
-      console.error(
-        "❌ Error fetching songs:",
-        error
-      );
-
-      return res.status(500).json({
-        success: false,
-        message:
-          "Error fetching songs",
-        error: error.message,
-      });
-    }
+    return res.status(500).json({
+      success: false,
+      message: "Error fetching songs",
+      error: error.message,
+    });
   }
-);
+});
 
 // ==================================================
 // SAVE SONG
 // ==================================================
 
-app.post(
-  "/api/songs",
-  async (req, res) => {
-    try {
-      await connectDB();
+app.post("/api/songs", async (req, res) => {
+  try {
+    await connectDB();
 
-      const {
-        title,
-        artist,
-        album,
-        audioUrl,
-        coverUrl,
-      } = req.body;
+    const {
+      title,
+      artist,
+      album,
+      audioUrl,
+      coverUrl,
+    } = req.body;
 
-      if (
-        !title ||
-        !artist ||
-        !audioUrl ||
-        !coverUrl
-      ) {
-        return res.status(400).json({
-          success: false,
-          message:
-            "Title, artist, audioUrl and coverUrl are required",
-        });
-      }
-
-      const newSong =
-        await Song.create({
-          title,
-          artist,
-          album: album || "Single",
-          audioUrl,
-          coverUrl,
-        });
-
-      io.emit(
-        "songAdded",
-        newSong
-      );
-
-      return res.status(201).json({
-        success: true,
-        message:
-          "Song saved successfully!",
-        song: newSong,
-      });
-    } catch (error) {
-      console.error(
-        "❌ Save song error:",
-        error
-      );
-
-      return res.status(500).json({
+    if (
+      !title ||
+      !artist ||
+      !audioUrl ||
+      !coverUrl
+    ) {
+      return res.status(400).json({
         success: false,
         message:
-          "Could not save song",
-        error: error.message,
+          "Title, artist, audioUrl and coverUrl are required",
       });
     }
+
+    const newSong = await Song.create({
+      title,
+      artist,
+      album: album || "Single",
+      audioUrl,
+      coverUrl,
+    });
+
+    io.emit("songAdded", newSong);
+
+    return res.status(201).json({
+      success: true,
+      message:
+        "Song saved successfully!",
+      song: newSong,
+    });
+  } catch (error) {
+    console.error(
+      "❌ Save song error:",
+      error
+    );
+
+    return res.status(500).json({
+      success: false,
+      message:
+        "Could not save song",
+      error: error.message,
+    });
   }
-);
+});
 
 // ==================================================
 // ERROR HANDLER
@@ -898,7 +881,7 @@ app.use(
       success: false,
       message:
         "Internal server error",
-      error: error.message,
+      error: err.message,
     });
   }
 );
@@ -914,14 +897,11 @@ const startServer = async () => {
   try {
     await connectDB();
 
-    server.listen(
-      PORT,
-      () => {
-        console.log(
-          `🚀 Server running on port ${PORT}`
-        );
-      }
-    );
+    server.listen(PORT, () => {
+      console.log(
+        `🚀 Server running on port ${PORT}`
+      );
+    });
   } catch (error) {
     console.error(
       "❌ Server startup failed:",
@@ -935,4 +915,3 @@ const startServer = async () => {
 startServer();
 
 export default server;
-
