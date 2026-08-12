@@ -1,8 +1,8 @@
-import React, { Suspense, lazy } from "react";
+import React, { Suspense, lazy, useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Home from "./pages/Home";
+import Lenis from "lenis";
+import Layout from "./Layout/Layout";
 
-// Lazy loading Admin component (Loaded only when route is accessed)
 const AdminUpload = lazy(() => import("./pages/Admin"));
 
 const LoadingFallback = () => (
@@ -12,11 +12,31 @@ const LoadingFallback = () => (
 );
 
 function App() {
+  useEffect(() => {
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+      touchMultiplier: 2,
+    });
+
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+
+    requestAnimationFrame(raf);
+
+    return () => {
+      lenis.destroy();
+    };
+  }, []);
+
   return (
     <BrowserRouter>
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Layout />} />
           <Route path="/admin" element={<AdminUpload />} />
         </Routes>
       </Suspense>
