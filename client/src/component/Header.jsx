@@ -40,11 +40,11 @@ function Header() {
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
     if (!backendUrl) {
-      console.error("❌ VITE_BACKEND_URL is missing");
+      // console.error("❌ VITE_BACKEND_URL is missing");
       return;
     }
 
-    console.log("🔌 Socket URL:", backendUrl);
+    // console.log("🔌 Socket URL:", backendUrl);
 
     const socket = io(backendUrl, {
       transports: ["websocket"],
@@ -56,11 +56,11 @@ function Header() {
     });
 
     socket.on("connect", () => {
-      console.log("🟢 Socket connected:", socket.id);
+      // console.log("🟢 Socket connected:", socket.id);
     });
 
     const handleOnlineCount = (count) => {
-      console.log("👥 Online count:", count);
+      // console.log("👥 Online count:", count);
       setOnlineCount(count);
     };
 
