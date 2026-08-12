@@ -113,51 +113,36 @@ function Home() {
   return (
     <main className="relative w-full h-[100dvh] min-h-[100dvh] overflow-hidden select-none bg-black font-sans">
       
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Khand:wght@700;800&display=swap');
-        .font-hindi {
-          font-family: 'Khand', sans-serif;
-          font-weight: 800;
-        }
-      `}</style>
-
       {/* ==================================================
-          OPTIMIZED & RESPONSIVE BACKGROUND IMAGE
+          FIXED BACKGROUND IMAGE (NO ZOOM / RESIZE GLITCH)
       ================================================== */}
-      <picture className="absolute inset-0 w-full h-full pointer-events-none z-0">
-        {/* Desktop Image Source (triggers download only on sm screens and up) */}
+      <picture className="fixed inset-0 w-full h-full pointer-events-none z-0">
+        {/* Desktop Image Source */}
         <source media="(min-width: 640px)" srcSet={img} />
         
         {/* Mobile Default Fallback Image */}
         <img
           src={mobileImg}
           alt="2000s Bollywood nostalgia"
-          className="w-full h-full object-cover object-center transform-gpu scale-100 transition-all duration-700 ease-out"
+          className="w-full h-full object-cover object-center transform-gpu"
           loading="eager"
           decoding="async"
           fetchPriority="high"
         />
       </picture>
 
-      {/* Dark Glass Overlay for better text readability */}
-      <div className="absolute inset-0 z-[1] bg-gradient-to-b from-black/40 via-black/10 to-black/40 pointer-events-none backdrop-blur-[1px]" />
+      {/* Dark Glass Overlay */}
+      {/* <div className="absolute inset-0 z-[1] bg-gradient-to-b from-black/40 via-black/10 to-black/40 pointer-events-none backdrop-blur-[1px]" /> */}
 
       <Header />
 
-      {/* ==================================================
-          HERO CONTENT (Text positioned top on mobile, center on desktop)
-      ================================================== */}
+      {/* HERO CONTENT */}
       <section
         className="
           relative z-10 w-full h-full
           flex flex-col items-center
-          
-          /* Mobile: Align top to show shop background */
           justify-start pt-[12vh] 
-          
-          /* Desktop: Align center */
           sm:justify-center sm:pt-0 
-
           px-5 sm:px-8 md:px-12 lg:px-20
           pb-24 sm:pb-28
           text-center
@@ -212,9 +197,7 @@ function Home() {
         </div>
       </section>
 
-      {/* ==================================================
-          FOOTER / SOCIAL ICONS
-      ================================================== */}
+      {/* FOOTER / SOCIAL ICONS */}
       <footer className="
         fixed bottom-6 left-1/2 -translate-x-1/2
         sm:left-8 sm:translate-x-0 lg:left-12
@@ -253,9 +236,7 @@ function Home() {
         </a>
       </footer>
 
-      {/* ==================================================
-          PLAYER / LOADING STATE
-      ================================================== */}
+      {/* PLAYER / LOADING STATE */}
       {currentTrack ? (
         <AudioPlayer
           key={currentTrack._id || currentTrack.id || currentTrackIndex}

@@ -1,9 +1,10 @@
 import React from "react";
 import logo from '../assets/favicon-32x32.png'
+import youtube from  '../assets/youtube.png'
 
 function Footer() {
   return (
-    <footer className="w-full bg-[#1e0505]/90 backdrop-blur-2xl border-t border-red-500/20 text-left px-6 py-12 md:px-16 md:py-16 font-sans select-text relative z-20 shadow-[0_-10px_35px_rgba(185,28,28,0.2)]">
+    <footer className="w-full bg-[#1e0505]/80 backdrop-blur-[1px]text-left px-6 py-12 md:px-16 md:py-16 font-sans select-text relative z-20 shadow-[0_-10px_35px_rgba(185,28,28,0.2)]">
       <div className="max-w-5xl mx-auto">
         
         {/* ==================================================
@@ -42,10 +43,10 @@ function Footer() {
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-12 max-w-md text-sm text-white/70 font-medium">
             <button className="text-left hover:text-white transition-colors">Bluetooth Hits</button>
-            <button className="text-left hover:text-white transition-colors">MP3 Classics</button>
+            <button className="text-left hover:text-white transition-colors">Emraan Hashmi</button>
+            <button className="text-left hover:text-white transition-colors">Himesh Reshammiya</button>
+            <button className="text-left hover:text-white transition-colors">Yo Yo Honey Singh</button>
             <button className="text-left hover:text-white transition-colors">90s & 2000s Dard</button>
-            <button className="text-left hover:text-white transition-colors">Late Night Lo-Fi</button>
-            <button className="text-left hover:text-white transition-colors">All songs</button>
           </div>
         </div>
 
@@ -56,13 +57,13 @@ function Footer() {
 
           {/* YT Music Button */}
           <a
-            href="#"
+            href="https://music.youtube.com/playlist?list=PLC2QJJ63bR5A"
+            target="_blank"
+            rel="noopener noreferrer"
             className="flex items-center gap-2 px-5 py-2 rounded-full bg-black/40 border border-white/10 hover:bg-black/60 transition-all text-sm text-white/80"
           >
-            <svg className="w-5 h-5 text-[#FF0000]" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l8 4.5-8 4.5z"/>
-            </svg>
-            YT Music
+          <img src={youtube} alt="YouTube" className="w-12 h-12" />
+            YouTube Music
           </a>
         </div>
 

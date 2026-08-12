@@ -3,12 +3,10 @@ import mongoose from "mongoose";
 let isConnecting = false;
 
 const connectDB = async () => {
-  // Already connected
   if (mongoose.connection.readyState === 1) {
     return;
   }
 
-  // Connection already in progress
   if (isConnecting) {
     return;
   }
