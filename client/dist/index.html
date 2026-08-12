@@ -3,14 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <!--
+      Removed obsolete X-UA-Compatible tag.
+      Modern browsers don't need it.
+    -->
 
-    <!-- Core Primary SEO Meta Tags -->
+    <!-- SEO & Page Identity -->
+    <!-- The font Khand is chosen to render Hindi text. It is loaded in the following section. -->
     <title>वो ज़माना • 2000s Nostalgic Bollywood Music Player</title>
-    <meta
-      name="title"
-      content="वो ज़माना • 2000s Nostalgic Bollywood Music Player"
-    />
     <meta
       name="description"
       content="Experience the golden era of 2000s Bollywood hits—KK, Emraan Hashmi, Pritam, and Honey Singh. Relisten to the soundtrack of your youth with high quality MP3 streaming."
@@ -24,18 +24,31 @@
     <meta name="theme-color" content="#000000" />
 
     <!-- Favicon Suite -->
+    <!--
+      Favicons are optimized by placing them in the 'public' directory at the root and referencing them with an absolute path.
+      **Make sure to move these files to the public directory.**
+    -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/client/src/assets/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/client/src/assets/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/client/src/assets/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
 
-    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32-Gza0AEd2.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16-DR3nwaZZ.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="./src/assets/apple-touch-icon.png" />
-     <link rel="manifest" href="/site.webmanifest" />
+    <!-- Preconnect for Performance Optimization -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-    <!-- Canonical URL (Replace with your live domain) -->
-    <link rel="canonical" href="https://yourdomain.com/" />
+    <!-- Desired Hindi Font - Khand -->
+    <link href="https://fonts.googleapis.com/css2?family=Khand:wght@400;700&display=swap" rel="stylesheet" />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://wohzamana.netlify.app/" />
 
     <!-- Open Graph / Facebook / WhatsApp -->
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:site_name" content="वो ज़माना" />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://yourdomain.com/" />
+    <meta property="og:url" content="https://wohzamana.netlify.app/" />
     <meta
       property="og:title"
       content="वो ज़माना • 2000s Nostalgic Bollywood Music Player"
@@ -45,33 +58,30 @@
       content="Stream nostalgia with the classic soundtrack of the 2000s. Relive the Bluetooth era of Bollywood music."
     />
     <meta
+      property="og:image:alt"
+      content="वो ज़माना music player banner"
+    />
+    <!-- OG Image path updated based on your Netlify domain -->
+    <meta
       property="og:image"
-      content="https://yourdomain.com/og-banner.png"
+      content="https://wohzamana.netlify.app/images/banner.png"
     />
 
-    <!-- Twitter / X Meta Tags -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://yourdomain.com/" />
-    <meta
-      name="twitter:title"
-      content="वो ज़माना • 2000s Nostalgic Bollywood Music Player"
-    />
-    <meta
-      name="twitter:description"
-      content="Stream nostalgia with the classic soundtrack of the 2000s. Relive the Bluetooth era of Bollywood music."
-    />
-    <meta
-      name="twitter:image"
-      content="https://yourdomain.com/og-banner.png"
-    />
-
-    <!-- Preconnect for Performance Optimization -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <script type="module" crossorigin src="/assets/index-DNxcQ4Wr.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-opDeVHBa.css">
+    <!-- Structured Data (JSON-LD) for SEO -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "वो ज़माना",
+        "description": "2000s Nostalgic Bollywood Music Player",
+        "url": "https://wohzamana.netlify.app/"
+      }
+    </script>
+    <script type="module" crossorigin src="/assets/index-DiktMfXE.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-BOLZuX6Q.css">
   </head>
   <body>
     <div id="root"></div>
+    <!-- Script tag optimized with 'defer' for non-blocking execution -->
   </body>
 </html>

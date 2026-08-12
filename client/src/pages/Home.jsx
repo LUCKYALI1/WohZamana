@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 
-import img from "../assets/bg.png";
-import mobileImg from "../assets/mobile.jpg";
+import img from "../assets/bg.webp";
+import mobileImg from "../assets/mobile.webp";
 
 import Header from "../component/Header";
 import AudioPlayer from "../ui/Player";
@@ -166,7 +166,7 @@ function Home() {
         <div className="w-full max-w-4xl flex flex-col items-center justify-center mx-auto">
           
           <p className="
-            mb-2 sm:mb-4
+            mb-5 sm:mb-4
             text-xs sm:text-sm md:text-base
             font-mono font-extrabold uppercase
             tracking-[0.2em] sm:tracking-[0.3em]
@@ -179,7 +179,7 @@ function Home() {
 
           <h1 className="
             font-hindi
-            text-[8rem] sm:text-7xl md:text-9xl lg:text-[10rem]
+            text-8xl sm:text-7xl md:text-9xl lg:text-[10rem]
             tracking-tight
             leading-[0.8]
             text-white
@@ -191,7 +191,7 @@ function Home() {
 
           <h2 className="
             mt-3 sm:mt-4
-            text-1xl sm:text-2xl lg:text-3xl
+            text-xl sm:text-2xl lg:text-3xl
             font-semibold uppercase
             tracking-wide sm:tracking-[0.1em]
             text-white/80

@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Block admin routes from search indexing
+Disallow: /admin
+
+# Point Googlebot to your sitemap
+Sitemap: https://wohzamana.netlify.app/sitemap.xml
